@@ -1,0 +1,11 @@
+#DIRS
+node_modules
+localdev/data/db
+dist
+coverage
+out
+.idea
+
+#FILES
+.env
+test.http
