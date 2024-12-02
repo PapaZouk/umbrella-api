@@ -30,7 +30,7 @@ describe('Employee Schema Validation Test', () => {
       }
    });
 
-   it('should not save Employee if lastNAme is missing', async () => {
+   it('should not save Employee if lastName is missing', async () => {
       const employee = new Employee(EmployeeGenerator({ personalData: { lastName: null } }));
 
       try {
@@ -241,6 +241,18 @@ describe('Employee Schema Validation Test', () => {
       }
    });
 
+
+   it('should not save Employee if currency is missing', async () => {
+      const employee = new Employee(EmployeeGenerator({ jobDetails: { salary: { currency: null } } }));
+
+      try {
+         await employee.save();
+      } catch (error) {
+         expect(error.errors['jobDetails.salary.currency']).toBeDefined();
+         expect(error.errors['jobDetails.salary.currency'].message).toBe('Path `currency` is required');
+      }
+   });
+
    it('should not save Employee if bankAccount is missing', async () => {
       const employee = new Employee(EmployeeGenerator({ jobDetails: { salary: { bankAccount: null } } }));
 
@@ -263,6 +275,20 @@ describe('Employee Schema Validation Test', () => {
       expect(savedEmployee?.personalData?.firstName).toBe(employee.personalData.firstName);
       expect(savedEmployee?.personalData.email).toBe(employee.personalData.email);
       expect(savedEmployee?.personalData.clothSize).toBe('');
+   });
+
+
+   it('should save Employee if bankName is missing', async () => {
+      const employee = new Employee(EmployeeGenerator({ jobDetails: { salary: { bankName: '' }} }));
+
+      await employee.save();
+
+      const savedEmployee = await Employee.findOne({ 'personalData.email': employee.personalData.email, });
+
+      expect(savedEmployee).toBeTruthy();
+      expect(savedEmployee?.personalData?.firstName).toBe(employee.personalData.firstName);
+      expect(savedEmployee?.personalData.email).toBe(employee.personalData.email);
+      expect(savedEmployee?.personalData.bankName).toBe('');
    });
 
    it('should save Employee if secondary address data is missing', async () => {

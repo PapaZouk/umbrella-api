@@ -1,7 +1,8 @@
 import dotenv from "dotenv";
+import {getEnvValue, getEnvValueOrDefault} from "../../utils/env-var-loader/getEnvValue";
 dotenv.config();
 
-const env = process.env.NODE_ENV || 'development';
+const env = getEnvValueOrDefault('NODE_ENV', 'development');
 let user;
 let password;
 let cluster;

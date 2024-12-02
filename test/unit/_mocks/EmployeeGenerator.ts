@@ -25,7 +25,9 @@ export function EmployeeGenerator(override?: Partial<IEmployee>){
             annualLeaveDays: override?.jobDetails?.annualLeaveDays ? override.jobDetails.annualLeaveDays : faker.number.int({ min: 21, max: 26 }),
             salary: {
                 baseSalary: override?.jobDetails?.salary?.baseSalary ? override.jobDetails.salary.baseSalary : faker.number.int({ min: 2000, max: 20000 }),
+                currency: override?.jobDetails?.salary?.currency ? override?.jobDetails.salary.currency : faker.helpers.arrayElement(['zł', 'euro', 'usd', 'gb']),
                 bankAccount: override?.jobDetails?.salary?.bankAccount ? override.jobDetails.salary.bankAccount : faker.string.numeric({ length: 20 }),
+                bankName: override?.jobDetails?.salary?.bankName ? override?.jobDetails.salary.bankName : faker.company.name()
             },
         },
     }

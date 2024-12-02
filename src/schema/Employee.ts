@@ -38,12 +38,14 @@ export interface IEmployee extends Document {
         annualLeaveDays?: number|null;
         salary?: {
             baseSalary?: number|null;
+            currency?: string|null;
             bankAccount?: string|null;
+            bankName?: string|null;
         }
     };
 }
 
-export interface ICreateEmployeeRequest extends Document {
+export interface IEmployeeRequest extends Document {
     personalData?: {
         firstName?: string;
         lastName?: string;
@@ -80,7 +82,9 @@ export interface ICreateEmployeeRequest extends Document {
         annualLeaveDays?: number;
         salary?: {
             baseSalary?: number;
+            currency?: string;
             bankAccount?: string;
+            bankName?: string;
         }
     };
 }
@@ -122,7 +126,9 @@ const employeeSchema = new Schema<IEmployee>({
         annualLeaveDays: { type: Number, required: true },
         salary: {
             baseSalary: { type: Number, required: true },
-            bankAccount: { type: String, require: true }
+            currency: { type: String, required: true },
+            bankAccount: { type: String, require: true },
+            bankName: { type: String }
         }
     }
 });

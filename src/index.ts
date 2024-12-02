@@ -1,24 +1,33 @@
-import dotenv from "dotenv";
+import dotenv from 'dotenv';
+
 import express, {Request, Response} from "express";
 import mongoose from "mongoose";
 import jwt from 'jsonwebtoken';
+import cors from 'cors';
 import User, {IUserLoginRequest, IUserRegisterRequest} from "./schema/User";
 import {umbrellaUri} from "./db/config/DatabaseConfig";
-import Employee, {ICreateEmployeeRequest} from "./schema/Employee";
+import Employee, {IEmployeeRequest} from "./schema/Employee";
 import {MongoError} from "mongodb";
+import {getEnvValueOrDefault} from "./utils/env-var-loader/getEnvValue";
+
+const app = express();
+const port = getEnvValueOrDefault('PORT', '3000');
 
 dotenv.config();
 
-const app = express();
-const port = process.env.PORT || 3000;
-
 app.use(express.json());
+app.use(cors({
+    origin: 'http://localhost:5173',
+    methods: 'GET,HEAD,PUT,POST,DELETE,OPTIONS',
+    allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 
 mongoose.connect(umbrellaUri).then(() => console.log("Connected to DB"))
     .catch(err => console.log(err));
 
-app.get("/", (req, res) => {
-    res.send('Hello from Umbrella API!');
+
+app.get("/health", (req, res) => {
+    res.send('OK');
 });
 
 // @ts-ignore
@@ -67,8 +76,8 @@ app.post("/login", async (req: Request<{}, {}, IUserLoginRequest>, res: Response
 });
 
 // @ts-ignore
-app.post('/employee/new', async (req: Request<{}, {}, ICreateEmployeeRequest>, res: Response) => {
-    const request: ICreateEmployeeRequest = req.body;
+app.post('/employee/new', async (req: Request<{}, {}, IEmployeeRequest>, res: Response) => {
+    const request: IEmployeeRequest = req.body;
 
     try {
         const employee = new Employee({...request});
@@ -121,10 +130,10 @@ app.get('/employee/search', async (req: Request, res: Response) => {
 });
 
 // @ts-ignore
-app.get('/employee/:email', async (req: Request, res: Response) => {
-    const { email } = req.params;
+app.get('/employee/:id', async (req: Request, res: Response) => {
+    const { id } = req.params;
     try {
-        const employee = await Employee.findOne({ 'personalData.email': email });
+        const employee = await Employee.findOne({ '_id': id });
 
         if (!employee) {
             return res.status(404).json({ message: 'Failed to retrieve employee'});
@@ -132,6 +141,33 @@ app.get('/employee/:email', async (req: Request, res: Response) => {
         res.status(200).json(employee);
     } catch (error) {
         res.status(500).json({ message: 'Error while retrieving employee' });
+    }
+});
+
+// @ts-ignore
+app.put('/employee/:id', async (req: Request, res: Response): Promise<Response> => {
+   const { id } = req.params;
+   const request: IEmployeeRequest = req.body;
+
+   try {
+       await Employee.findByIdAndUpdate(id, request);
+       return res.status(200).json({message: 'Employee updated'});
+   } catch (error) {
+       res.status(500).json({message: 'Error while updating employee', error: (error as Error).message});
+   }
+});
+
+
+// @ts-ignore
+app.delete('/employee/:id', async (req: Request, res: Response): Promise<Response> => {
+    const { id } = req.params;
+
+    try {
+        await Employee.findByIdAndDelete(id);
+
+        return res.status(200).json({message: 'Employee deleted'});
+    } catch (error) {
+        res.status(500).json({message: 'Error while deleting employee', error: (error as Error).message});
     }
 });
 
